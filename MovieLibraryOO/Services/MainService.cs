@@ -1,5 +1,6 @@
 ﻿using ConsoleTables;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using MovieLibraryEntities.Context;
 using MovieLibraryEntities.Dao;
 using MovieLibraryEntities.Models;
@@ -17,6 +18,8 @@ namespace MovieLibraryOO.Services
         private readonly IMovieMapper _movieMapper;
         private readonly IRepository _repository;
         private readonly IFileService _fileService;
+        var factory = LoggerFactory.Create(b => b.AddConsole());
+        var logger = factory.CreateLogger<User>();
 
         public MainService(ILogger<MainService> logger, IMovieMapper movieMapper, IRepository repository, IFileService fileService)
         {
@@ -127,6 +130,74 @@ namespace MovieLibraryOO.Services
                         movies = _movieMapper.Map(searchedMovies);
                         ConsoleTable.From<MovieDto>(movies).Write();
                         break;
+
+                     case Menu.MenuOptions.AddNewUser:
+                        System.Console.WriteLine("Enter new user age: ");
+                        var username = Console.ReadLine();
+                        System.Console.WriteLine("Enter the new user's gender: ");
+                        var usergend = Console.ReadLine();
+                        System.Console.WriteLine("Enter user occupation: ");
+                        var useroccupation = Console.ReadLine();
+
+                          var user = new User();
+                            user.Name = username;
+                             
+                                 var occupation = db.Occupations.FirstOrDefault(x=>x.Name == useroccupation); 
+                                 user.Occupation = occupation; 
+                                 db.User.Add(user);
+                        break;
+                         case Menu.MenuOptions.ListUser:
+                        _logger.LogInformation("Searching for Users");
+                        var userSearchTerm = menu.GetUserResponse("Enter your", "search string:", "green");
+                        var searchedUsers = _repository.Search(userSearchTerm);
+                        users = _movieMapper.Map(searchedUsers);
+                        ConsoleTable.From<MovieDto>(users).Write();
+                        break;
+
+                        case Menu.MenuOptions.RateMovie:
+                        _logger.LogInformation("Searching for a movie");
+                        var userSearchTerm = menu.GetUserResponse("Enter your", "search string:", "green");
+                        var searchedMovies = _repository.Search(userSearchTerm);
+                        movies = _movieMapper.Map(searchedMovies);
+                        ConsoleTable.From<MovieDto>(movies).Write();
+                        System.Console.WriteLine("Enter user ID: ");
+                        var userId = Console.ReadLine();
+                        System.Console.WriteLine("Enter a rating for the movie: ");
+                        var movierating = Console.ReadLine();
+                           var user = db.Users.Where(x=>x.Id == userId);
+                        var movie = db.Movies.FirstOrDefault(x=>x.Title == movies);
+    
+                         
+                        var userMovie = new UserMovie();
+                         userMovie.Rating = movierating;
+                         userMovie.RatedAt = DateTime.Now;
+
+                            
+                          userMovie.User = user;
+                          userMovie.Movie = movie;
+
+                         
+                          db.UserMovies.Add(userMovie);
+                          db.SaveChanges();
+
+                        break;
+
+                        case Menu.MenuOptions.FavoriteMovie:
+                        _logger.LogInformation("Searching for Users");
+                        System.Console.WriteLine("What is your user ID?: ");
+                         var userId = Console.ReadLine();
+                         System.Console.WriteLine("What is your favorite movie?: ");
+                        var favoriteMovie = Console.ReadLine();
+                         var user = db.Users.Where(x=>x.Id == userId);
+                        var movie = db.UserMovie.FirstOrDefault(x=>x.Title == favoriteMovie);
+                        var userMovie = new UserMovie();
+                        userMovie.Favorite = favoriteMovie;
+                        userMovie.User = user;
+
+                        db.UserMovies.Add(userMovie);
+                        db.SaveChanges();
+                        break;
+
                 }
             }
             while (menuChoice != Menu.MenuOptions.Exit);

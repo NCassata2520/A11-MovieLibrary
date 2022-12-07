@@ -16,6 +16,10 @@ namespace MovieLibraryOO
             Update,
             Delete,
             Search,
+            AddNewUser,
+            ListUser,
+            RateMovie,
+            FavoriteMovie,
             Exit
         }
 

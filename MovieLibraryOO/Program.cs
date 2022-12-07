@@ -14,6 +14,8 @@ namespace MovieLibraryOO
         {
             try
             {
+                var factory = LoggerFactory.Create(b => b.AddConsole());
+                var logger = factory.CreateLogger<Program>();
                 var startup = new Startup();
                 var serviceProvider = startup.ConfigureServices();
                 var service = serviceProvider.GetService<IMainService>();
